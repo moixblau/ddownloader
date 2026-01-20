@@ -1,0 +1,29 @@
+<table class="w-full text-left border-collapse">
+    <thead>
+    <tr class="border-bottom-1 surface-border">
+        <th class="p-3">Name</th>
+        <th class="p-3" style="width: 180px;">Size</th>
+        <th class="p-3 text-center" style="width: 120px;">Action</th>
+    </tr>
+    </thead>
+    <tbody id="file-tree-body">
+    {{range .}}
+    <tr class="border-bottom-1 surface-border hover:surface-hover">
+        <td class="p-3">
+            <i class="pi {{.Icon}} mr-2" style="color: {{.Color}}"></i>
+            {{.Name}}
+        </td>
+        <td class="p-3">
+            <span class="size-tag" data-size="{{.FormatSize}}">
+                {{.FormatSize}}
+            </span>
+        </td>
+        <td class="p-3 text-center">
+            <a href="/download?path={{.Path}}" class="download-icon">
+                <i class="pi pi-download"></i>
+            </a>
+        </td>
+    </tr>
+    {{end}}
+    </tbody>
+</table>

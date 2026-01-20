@@ -1,0 +1,10 @@
+services:
+  ddownloader:
+    build: .
+    image: moixblau/ddownloader:latest
+    container_name: ddownloader-app
+    ports:
+      - "3323:3000"
+    volumes:
+      - /volume1/downloads/complete:/data:ro
+    restart: unless-stopped
