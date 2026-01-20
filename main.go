@@ -58,7 +58,6 @@ func handleFilesTable(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("templates/table.html"))
 	tmpl.Execute(w, nodes)
 
-	// Liberar memoria después de un escaneo potencialmente grande
 	runtime.GC()
 	debug.FreeOSMemory()
 }
@@ -195,7 +194,7 @@ func scanDirectory(rootPath string, depth int) ([]FileNode, error) {
 		}
 
 		if file.IsDir() {
-			if depth < 0 { // No escaneamos hijos recursivamente para ahorrar mucha memoria
+			if depth < 0 {
 				childScanner, _ := scanDirectory(fullPath, depth+1)
 				for _, child := range childScanner {
 					node.TotalSize += child.TotalSize
