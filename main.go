@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
+	"runtime/debug"
 )
 
 type FileNode struct {
@@ -39,7 +41,7 @@ func handleFilesTable(w http.ResponseWriter, r *http.Request) {
 		dataDir = "/data"
 	}
 
-	nodes, err := scanDirectory(dataDir)
+	nodes, err := scanDirectory(dataDir, 0)
 	if err != nil {
 		if os.IsNotExist(err) {
 			nodes = []FileNode{}
@@ -55,6 +57,10 @@ func handleFilesTable(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := template.Must(template.ParseFiles("templates/table.html"))
 	tmpl.Execute(w, nodes)
+
+	// Liberar memoria después de un escaneo potencialmente grande
+	runtime.GC()
+	debug.FreeOSMemory()
 }
 
 func fillFormatSize(node *FileNode) {
@@ -85,28 +91,61 @@ func handleDownload(w http.ResponseWriter, r *http.Request) {
 		zw := zip.NewWriter(w)
 		defer zw.Close()
 
-		filepath.Walk(path, func(fpath string, info os.FileInfo, err error) error {
-			if err != nil || info.IsDir() {
+		ctx := r.Context()
+
+		err := filepath.WalkDir(path, func(fpath string, d os.DirEntry, err error) error {
+			if err != nil {
 				return err
 			}
 
-			return func() error {
-				relPath, _ := filepath.Rel(path, fpath)
-				zipFile, err := zw.Create(relPath)
-				if err != nil {
-					return err
-				}
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+			}
 
-				fsFile, err := os.Open(fpath)
-				if err != nil {
-					return err
-				}
-				defer fsFile.Close()
+			if d.IsDir() {
+				return nil
+			}
 
-				_, err = io.Copy(zipFile, fsFile)
+			info, err := d.Info()
+			if err != nil {
 				return err
-			}()
+			}
+
+			relPath, err := filepath.Rel(path, fpath)
+			if err != nil {
+				return err
+			}
+
+			header, err := zip.FileInfoHeader(info)
+			if err != nil {
+				return err
+			}
+			header.Name = relPath
+			header.Method = zip.Store
+
+			zipFile, err := zw.CreateHeader(header)
+			if err != nil {
+				return err
+			}
+
+			fsFile, err := os.Open(fpath)
+			if err != nil {
+				return err
+			}
+			defer fsFile.Close()
+
+			_, err = io.Copy(zipFile, fsFile)
+			return err
 		})
+
+		if err != nil {
+			fmt.Printf("Error during download: %v\n", err)
+		}
+		runtime.GC()
+		debug.FreeOSMemory()
+		return
 	} else {
 		file, _ := os.Open(path)
 		defer file.Close()
@@ -116,7 +155,24 @@ func handleDownload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func scanDirectory(rootPath string) ([]FileNode, error) {
+func calculateDirSize(path string) int64 {
+	var size int64
+	filepath.WalkDir(path, func(_ string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			info, err := d.Info()
+			if err == nil {
+				size += info.Size()
+			}
+		}
+		return nil
+	})
+	return size
+}
+
+func scanDirectory(rootPath string, depth int) ([]FileNode, error) {
 	var nodes []FileNode
 
 	files, err := os.ReadDir(rootPath)
@@ -139,11 +195,15 @@ func scanDirectory(rootPath string) ([]FileNode, error) {
 		}
 
 		if file.IsDir() {
-			childScanner, _ := scanDirectory(fullPath)
-			for _, child := range childScanner {
-				node.TotalSize += child.TotalSize
+			if depth < 0 { // No escaneamos hijos recursivamente para ahorrar mucha memoria
+				childScanner, _ := scanDirectory(fullPath, depth+1)
+				for _, child := range childScanner {
+					node.TotalSize += child.TotalSize
+				}
+				node.Children = childScanner
+			} else {
+				node.TotalSize = calculateDirSize(fullPath)
 			}
-			node.Children = childScanner
 		} else {
 			node.TotalSize = info.Size()
 		}
