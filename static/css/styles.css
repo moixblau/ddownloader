@@ -36,6 +36,27 @@ body {
     font-weight: bold;
 }
 
+.file-name-container {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    width: 100%;
+}
+
+.truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .download-icon {
     color: #34d399;
     font-size: 1.2rem;
