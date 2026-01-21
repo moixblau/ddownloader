@@ -1,0 +1,33 @@
+{{range .}}
+<tr id="row-{{.Path}}" class="border-bottom-1 surface-border hover:surface-hover">
+    <td class="p-3" style="padding-left: {{multiply .Level 1.5}}rem !important;">
+        {{if .IsFolder}}
+        <i class="pi pi-chevron-right cursor-pointer mr-2 expansion-icon"
+           hx-get="/folder?path={{.Path}}&level={{.Level}}"
+           hx-target="closest tr"
+           hx-swap="afterend"
+           hx-trigger="click[this.classList.contains('pi-chevron-down')]"
+           onclick="toggleIcon(this)"></i>
+        <i class="pi {{.Icon}} mr-2 folder-icon" style="color: {{.Color}}"></i>
+        {{.Name}}
+        {{else}}
+        <span style="display: inline-block; width: 1.5rem;"></span>
+        <i class="pi {{.Icon}} mr-2" style="color: {{.Color}}"></i>
+        {{.Name}}
+        {{end}}
+    </td>
+    <td class="p-3">
+        <span class="size-tag" data-size="{{.FormatSize}}">
+            {{.FormatSize}}
+        </span>
+    </td>
+    <td class="p-3 text-center">
+        <a href="/download?path={{.Path}}" class="download-icon">
+            <i class="pi pi-download"></i>
+        </a>
+        <a href="" class="trash-icon">
+            <i class="pi pi-trash"></i>
+        </a>
+    </td>
+</tr>
+{{end}}

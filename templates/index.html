@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="es" class="p-dark">
 <head>
+    <title>DDownloader</title>
+
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://unpkg.com/primeflex@latest/primeflex.css">
     <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css">
     <link rel="stylesheet" href="https://unpkg.com/primereact/resources/themes/lara-dark-indigo/theme.css" id="theme-link">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
 
     <script src="/static/js/utils.js" defer></script>
     <link rel="stylesheet" href="/static/css/styles.css">
@@ -20,7 +21,7 @@
 
         <hr class="group-divider">
 
-            <div hx-get="/files" hx-trigger="load, sse:datachanged">
+            <div hx-get="/files" hx-trigger="load">
                 <div class="flex justify-content-center p-5">
                     <i class="pi pi-spin pi-spinner text-muted" style="font-size: 2rem"></i>
                 </div>

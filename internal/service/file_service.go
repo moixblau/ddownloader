@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func ScanDirectory(rootPath string, depth int) ([]models.FileNode, error) {
+func ScanDirectory(rootPath string, level int) ([]models.FileNode, error) {
 	var nodes []models.FileNode
 
 	files, err := os.ReadDir(rootPath)
@@ -27,18 +27,11 @@ func ScanDirectory(rootPath string, depth int) ([]models.FileNode, error) {
 			IsFolder: file.IsDir(),
 			Icon:     icon,
 			Color:    color,
+			Level:    level,
 		}
 
 		if file.IsDir() {
-			if depth < 0 {
-				childScanner, _ := ScanDirectory(fullPath, depth+1)
-				for _, child := range childScanner {
-					node.TotalSize += child.TotalSize
-				}
-				node.Children = childScanner
-			} else {
-				node.TotalSize = CalculateDirSize(fullPath)
-			}
+			node.TotalSize = CalculateDirSize(fullPath)
 		} else {
 			node.TotalSize = info.Size()
 		}

@@ -18,7 +18,7 @@ func GetFileMeta(path string, isDir bool) (string, string) {
 	case ".pdf":
 		return "pi-file-pdf", "#f44336"
 	case ".zip", ".rar":
-		return "pi-file-archive", "#9c27b0"
+		return "pi-book", "#9c27b0"
 	default:
 		return "pi-file", "var(--primary-color)"
 	}

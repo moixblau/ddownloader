@@ -9,4 +9,5 @@ type FileNode struct {
 	Icon       string
 	Color      string
 	Children   []FileNode
+	Level      int
 }

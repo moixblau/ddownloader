@@ -7,23 +7,6 @@
     </tr>
     </thead>
     <tbody id="file-tree-body">
-    {{range .}}
-    <tr class="border-bottom-1 surface-border hover:surface-hover">
-        <td class="p-3">
-            <i class="pi {{.Icon}} mr-2" style="color: {{.Color}}"></i>
-            {{.Name}}
-        </td>
-        <td class="p-3">
-            <span class="size-tag" data-size="{{.FormatSize}}">
-                {{.FormatSize}}
-            </span>
-        </td>
-        <td class="p-3 text-center">
-            <a href="/download?path={{.Path}}" class="download-icon">
-                <i class="pi pi-download"></i>
-            </a>
-        </td>
-    </tr>
-    {{end}}
+    {{template "rows.html" .}}
     </tbody>
 </table>

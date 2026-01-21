@@ -24,5 +24,7 @@ COPY --from=builder /app/templates ./templates
 
 EXPOSE 3000
 
-# Ejecutamos la aplicación
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
 CMD ["./ddownloader"]
