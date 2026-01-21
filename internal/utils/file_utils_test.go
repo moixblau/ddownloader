@@ -17,6 +17,9 @@ func TestGetFileMeta(t *testing.T) {
 		{"doc.pdf", false, "pi-file-pdf", "#f44336"},
 		{"archive.zip", false, "pi-book", "#9c27b0"},
 		{"unknown.txt", false, "pi-file", "var(--primary-color)"},
+		{"archivo con espacios.txt", false, "pi-file", "var(--primary-color)"},
+		{"niño.png", false, "pi-image", "#4caf50"},
+		{"🔥emoji.mp4", false, "pi-video", "#ff5722"},
 	}
 
 	for _, tt := range tests {

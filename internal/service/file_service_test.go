@@ -127,3 +127,110 @@ func TestSearchFiles(t *testing.T) {
 		})
 	}
 }
+
+func TestStrangeCharacters(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "teststrange")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	strangeNames := []string{
+		"archivo con espacios.txt",
+		"niño.txt",
+		"canción.mp3",
+		"🔥emoji.png",
+		"special!@#$%^&()_+-=.txt",
+		"日本語.txt",
+	}
+
+	for _, name := range strangeNames {
+		err := os.WriteFile(filepath.Join(tmpDir, name), []byte("test content"), 0644)
+		if err != nil {
+			t.Fatalf("failed to create file %q: %v", name, err)
+		}
+	}
+
+	svc := NewFileService(tmpDir)
+	nodes, err := svc.ScanDirectory(tmpDir, 0)
+	if err != nil {
+		t.Fatalf("ScanDirectory failed: %v", err)
+	}
+
+	if len(nodes) != len(strangeNames) {
+		t.Errorf("got %d nodes, want %d", len(nodes), len(strangeNames))
+	}
+
+	// Verify each name is present
+	foundNames := make(map[string]bool)
+	for _, node := range nodes {
+		foundNames[node.Name] = true
+	}
+
+	for _, name := range strangeNames {
+		if !foundNames[name] {
+			t.Errorf("name %q not found in ScanDirectory results", name)
+		}
+	}
+
+	// Test SearchFiles with strange characters
+	t.Run("SearchStrangeCharacters", func(t *testing.T) {
+		query := "niño"
+		nodes, err := svc.SearchFiles(tmpDir, query)
+		if err != nil {
+			t.Fatalf("SearchFiles failed: %v", err)
+		}
+		if len(nodes) != 1 || nodes[0].Name != "niño.txt" {
+			t.Errorf("SearchFiles(%q) failed to find the file", query)
+		}
+
+		query = "🔥"
+		nodes, err = svc.SearchFiles(tmpDir, query)
+		if err != nil {
+			t.Fatalf("SearchFiles failed: %v", err)
+		}
+		if len(nodes) != 1 || nodes[0].Name != "🔥emoji.png" {
+			t.Errorf("SearchFiles(%q) failed to find the file", query)
+		}
+	})
+}
+
+func TestManyFiles(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "testmanyfiles")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	count := 1000
+	for i := 0; i < count; i++ {
+		name := filepath.Join(tmpDir, "file_"+string(rune(i))+".txt")
+		// Use a more predictable naming to avoid filesystem issues with some control characters if rune(i) is weird
+		name = filepath.Join(tmpDir, "file_"+os.ExpandEnv(string(rune(65+(i%26))))+"_"+string(rune(48+(i%10)))+"_"+string(rune(i))+".txt")
+		// Actually simpler:
+		name = filepath.Join(tmpDir, "file_"+string(rune(i%1000))+".txt")
+		// Wait, some runes might be invalid for filenames or be path separators. Let's use simple numbers.
+		name = filepath.Join(tmpDir, "file_"+string(rune(48+(i/100)))+string(rune(48+(i/10)%10))+string(rune(48+(i%10)))+".txt")
+
+		err := os.WriteFile(name, []byte("a"), 0644)
+		if err != nil {
+			t.Fatalf("failed to create file %d: %v", i, err)
+		}
+	}
+
+	svc := NewFileService(tmpDir)
+	nodes, err := svc.ScanDirectory(tmpDir, 0)
+	if err != nil {
+		t.Fatalf("ScanDirectory failed: %v", err)
+	}
+
+	if len(nodes) != count {
+		t.Errorf("got %d nodes, want %d", len(nodes), count)
+	}
+
+	// Test CalculateDirSize with many files
+	size := svc.CalculateDirSize(tmpDir)
+	if size != int64(count) {
+		t.Errorf("CalculateDirSize() = %d; want %d", size, count)
+	}
+}
