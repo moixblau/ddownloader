@@ -2,55 +2,92 @@ package handlers
 
 import (
 	"archive/zip"
+	"ddownload/internal/config"
 	"ddownload/internal/models"
 	"ddownload/internal/service"
 	"fmt"
 	"html/template"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
 )
 
-func HandleIndex(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/index.html"))
-	tmpl.Execute(w, nil)
+type Handler struct {
+	cfg         *config.Config
+	fileService *service.FileService
+	templates   *template.Template
 }
 
-func HandleFilesTable(w http.ResponseWriter, r *http.Request) {
-	dataDir := os.Getenv("DATA_DIR")
-	if dataDir == "" {
-		dataDir = "/data"
-	}
-
-	nodes, err := service.ScanDirectory(dataDir, 0)
-	if err != nil {
-		if os.IsNotExist(err) {
-			nodes = []models.FileNode{}
-		} else {
-			http.Error(w, "Error scanning directory: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
-
-	for i := range nodes {
-		service.FillFormatSize(&nodes[i])
-	}
-
+func NewHandler(cfg *config.Config, fs *service.FileService) *Handler {
 	funcMap := template.FuncMap{
 		"multiply": func(a int, b float64) float64 {
 			return float64(a) * b
 		},
 	}
 
-	tmpl := template.Must(template.New("table.html").Funcs(funcMap).ParseFiles("templates/table.html", "templates/rows.html"))
-	tmpl.Execute(w, nodes)
+	tmpl := template.Must(template.New("").Funcs(funcMap).ParseFiles(
+		"templates/index.html",
+		"templates/table.html",
+		"templates/rows.html",
+	))
+
+	return &Handler{
+		cfg:         cfg,
+		fileService: fs,
+		templates:   tmpl,
+	}
 }
 
-func HandleFolderContent(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleIndex(w http.ResponseWriter, r *http.Request) {
+	if err := h.templates.ExecuteTemplate(w, "index.html", nil); err != nil {
+		h.cfg.Logger.Error("Error executing index template", "error", err)
+	}
+}
+
+func (h *Handler) HandleFilesTable(w http.ResponseWriter, r *http.Request) {
+	search := r.URL.Query().Get("search")
+
+	var nodes []models.FileNode
+	var err error
+
+	if search != "" {
+		nodes, err = h.fileService.SearchFiles(h.cfg.DataDir, search)
+	} else {
+		nodes, err = h.fileService.ScanDirectory(h.cfg.DataDir, 0)
+	}
+
+	if err != nil {
+		if os.IsNotExist(err) {
+			nodes = []models.FileNode{}
+		} else {
+			h.cfg.Logger.Error("Error getting files", "path", h.cfg.DataDir, "search", search, "error", err)
+			http.Error(w, "Error scanning directory", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	for i := range nodes {
+		h.fileService.FillFormatSize(&nodes[i])
+	}
+
+	if err := h.templates.ExecuteTemplate(w, "table.html", nodes); err != nil {
+		h.cfg.Logger.Error("Error executing table template", "error", err)
+	}
+}
+
+func (h *Handler) HandleFolderContent(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Query().Get("path")
 	if path == "" {
 		http.Error(w, "Path is required", http.StatusBadRequest)
+		return
+	}
+
+	validatedPath, err := h.fileService.ValidatePath(path)
+	if err != nil {
+		h.cfg.Logger.Warn("Access denied or invalid path", "path", path, "error", err)
+		http.Error(w, "Access denied", http.StatusForbidden)
 		return
 	}
 
@@ -60,52 +97,32 @@ func HandleFolderContent(w http.ResponseWriter, r *http.Request) {
 		fmt.Sscanf(levelStr, "%d", &level)
 	}
 
-	dataDir := os.Getenv("DATA_DIR")
-	if dataDir == "" {
-		dataDir = "/data"
-	}
-
-	absDataDir, err := filepath.Abs(dataDir)
+	nodes, err := h.fileService.ScanDirectory(validatedPath, level+1)
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		http.Error(w, "Invalid path", http.StatusBadRequest)
-		return
-	}
-
-	rel, err := filepath.Rel(absDataDir, absPath)
-	if err != nil || (len(rel) >= 2 && rel[:2] == "..") {
-		http.Error(w, "Access denied", http.StatusForbidden)
-		return
-	}
-
-	nodes, err := service.ScanDirectory(path, level+1)
-	if err != nil {
-		http.Error(w, "Error scanning directory: "+err.Error(), http.StatusInternalServerError)
+		h.cfg.Logger.Error("Error scanning folder content", "path", validatedPath, "error", err)
+		http.Error(w, "Error scanning directory", http.StatusInternalServerError)
 		return
 	}
 
 	for i := range nodes {
-		service.FillFormatSize(&nodes[i])
+		h.fileService.FillFormatSize(&nodes[i])
 	}
 
-	funcMap := template.FuncMap{
-		"multiply": func(a int, b float64) float64 {
-			return float64(a) * b
-		},
+	if err := h.templates.ExecuteTemplate(w, "rows.html", nodes); err != nil {
+		h.cfg.Logger.Error("Error executing rows template", "error", err)
 	}
-
-	tmpl := template.Must(template.New("rows.html").Funcs(funcMap).ParseFiles("templates/rows.html"))
-	tmpl.Execute(w, nodes)
 }
 
-func HandleDownload(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleDownload(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Query().Get("path")
-	stat, err := os.Stat(path)
+	validatedPath, err := h.fileService.ValidatePath(path)
+	if err != nil {
+		h.cfg.Logger.Warn("Access denied or invalid path for download", "path", path, "error", err)
+		http.Error(w, "Access denied", http.StatusForbidden)
+		return
+	}
+
+	stat, err := os.Stat(validatedPath)
 	if err != nil {
 		http.Error(w, "File not found", http.StatusNotFound)
 		return
@@ -120,7 +137,7 @@ func HandleDownload(w http.ResponseWriter, r *http.Request) {
 
 		ctx := r.Context()
 
-		err := filepath.WalkDir(path, func(fpath string, d os.DirEntry, err error) error {
+		err := filepath.WalkDir(validatedPath, func(fpath string, d os.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
@@ -140,7 +157,7 @@ func HandleDownload(w http.ResponseWriter, r *http.Request) {
 				return err
 			}
 
-			relPath, err := filepath.Rel(path, fpath)
+			relPath, err := filepath.Rel(validatedPath, fpath)
 			if err != nil {
 				return err
 			}
@@ -168,11 +185,16 @@ func HandleDownload(w http.ResponseWriter, r *http.Request) {
 		})
 
 		if err != nil {
-			fmt.Printf("Error during download: %v\n", err)
+			h.cfg.Logger.Error("Error during zip download", "path", validatedPath, "error", err)
 		}
 		return
 	} else {
-		file, _ := os.Open(path)
+		file, err := os.Open(validatedPath)
+		if err != nil {
+			h.cfg.Logger.Error("Error opening file for download", "path", validatedPath, "error", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
 		defer file.Close()
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", stat.Size()))
 		w.Header().Set("Content-Disposition", "attachment; filename="+stat.Name())
@@ -180,8 +202,31 @@ func HandleDownload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func HandleHealth(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleDelete(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	path := r.URL.Query().Get("path")
+	if err := h.fileService.DeletePath(path); err != nil {
+		h.cfg.Logger.Error("Error deleting path", "path", path, "error", err)
+		http.Error(w, "The file could not be deleted (Read-only system?)", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) HandleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
+}
+
+func LoggingMiddleware(logger *slog.Logger, next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		logger.Info("Request", "method", r.Method, "url", r.URL.String())
+		next(w, r)
+	}
 }

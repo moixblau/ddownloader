@@ -3,7 +3,7 @@
     --card-bg: #18181b;
     --border-color: #1f1f1f;
     --text-main: rgba(255, 255, 255, 0.86);
-    --text-muted: rgba(136, 136, 136, 0.2);
+    --text-muted: rgb(136, 136, 136);
     --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
 }
 
@@ -13,6 +13,9 @@ body {
     font-family: var(--font-mono);
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .surface-card {
@@ -77,4 +80,102 @@ td {
 
 .group-divider {
     border-color: inherit
+}
+.trash-icon {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    color: inherit;
+}
+
+.trash-icon:hover {
+    opacity: 0.7;
+}
+
+.p-input-icon-left {
+    position: relative;
+    display: inline-block;
+}
+
+.p-input-icon-left > i {
+    position: absolute;
+    top: 50%;
+    margin-top: -.5rem;
+    left: .75rem;
+    color: #6c757d;
+}
+
+.p-input-icon-left > .p-inputtext {
+    padding-left: 2.5rem;
+}
+
+.p-inputtext {
+    font-family: var(--font-family);
+    font-size: 1rem;
+    color: #ffffff;
+    background: #1f2937;
+    padding: 0.75rem 0.75rem;
+    border: 1px solid #374151;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    border-radius: 6px;
+    width: 250px;
+}
+
+.p-inputtext:hover {
+    border-color: var(--primary-color);
+}
+
+.p-inputtext:focus {
+    outline: 0 none;
+    outline-offset: 0;
+    box-shadow: 0 0 0 0.2rem #a5b4fc;
+    border-color: var(--primary-color);
+}
+
+/* Toasts */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    min-width: 250px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    color: white;
+    animation: slideIn 0.3s ease-out;
+    transition: opacity 0.5s ease;
+}
+
+.toast-error {
+    background-color: #b84242;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+
+/* Footer */
+footer {
+    border-top: 1px solid var(--border-color);
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.color-inherit {
+    color: inherit;
 }

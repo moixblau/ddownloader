@@ -26,12 +26,17 @@
         </span>
     </td>
     <td class="p-3 text-center">
-        <a href="/download?path={{.Path}}" class="download-icon">
+        <a href="/download?path={{.Path}}" class="download-icon" title="Download">
             <i class="pi pi-download"></i>
         </a>
-        <a href="" class="trash-icon">
-            <i class="pi pi-trash"></i>
-        </a>
+        <button class="trash-icon p-link" 
+                title="Delete"
+                hx-post="/delete?path={{.Path}}"
+                hx-confirm="¿Are you sure you want to delete '{{.Name}}'?"
+                hx-target="closest tr"
+                hx-swap="delete">
+            <i class="pi pi-trash" style="color: #f44336"></i>
+        </button>
     </td>
 </tr>
 {{end}}
