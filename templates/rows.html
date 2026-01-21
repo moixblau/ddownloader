@@ -16,16 +16,24 @@
         <div class="file-name-container" title="{{.Name}}">
             <span style="display: inline-block; width: 1.5rem;"></span>
             <i class="pi {{.Icon}} mr-2" style="color: {{.Color}}"></i>
-            <span class="truncate-text">{{.Name}}</span>
+            <span class="truncate-text {{if .IsDownloading}}downloading-text{{end}}">{{.Name}}</span>
         </div>
         {{end}}
     </td>
-    <td class="p-3">
-        <span class="size-tag" data-size="{{.FormatSize}}">
+    <td class="p-3 text-center">
+        <span class="size-tag {{if .IsDownloading}}downloading-tag{{end}}" data-size="{{.FormatSize}}">
             {{.FormatSize}}
         </span>
     </td>
     <td class="p-3 text-center">
+        {{if .IsDownloading}}
+        <span class="download-icon disabled" title="Downloading...">
+            <i class="pi pi-download"></i>
+        </span>
+        <span class="trash-icon disabled" title="Downloading...">
+            <i class="pi pi-trash"></i>
+        </span>
+        {{else}}
         <a href="/download?path={{.Path}}" class="download-icon" title="Download">
             <i class="pi pi-download"></i>
         </a>
@@ -37,6 +45,7 @@
                 hx-swap="delete">
             <i class="pi pi-trash" style="color: #f44336"></i>
         </button>
+        {{end}}
     </td>
 </tr>
 {{end}}

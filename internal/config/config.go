@@ -6,9 +6,12 @@ import (
 )
 
 type Config struct {
-	Port    string
-	DataDir string
-	Logger  *slog.Logger
+	Port             string
+	DataDir          string
+	TransmissionHost string
+	TransmissionUser string
+	TransmissionPass string
+	Logger           *slog.Logger
 }
 
 func LoadConfig() *Config {
@@ -22,11 +25,18 @@ func LoadConfig() *Config {
 		dataDir = "/data"
 	}
 
+	transmissionHost := os.Getenv("TRANSMISSION_HOST")
+	transmissionUser := os.Getenv("TRANSMISSION_USERNAME")
+	transmissionPass := os.Getenv("TRANSMISSION_PASSWORD")
+
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	return &Config{
-		Port:    port,
-		DataDir: dataDir,
-		Logger:  logger,
+		Port:             port,
+		DataDir:          dataDir,
+		TransmissionHost: transmissionHost,
+		TransmissionUser: transmissionUser,
+		TransmissionPass: transmissionPass,
+		Logger:           logger,
 	}
 }

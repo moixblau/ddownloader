@@ -37,6 +37,25 @@ body {
     border-radius: 6px;
     font-size: 0.8rem;
     font-weight: bold;
+    display: inline-block;
+    min-width: 100px;
+    text-align: center;
+}
+
+.downloading-tag {
+    background: #1e3a8a;
+    color: #93c5fd;
+    min-width: 120px;
+}
+
+.downloading-text {
+    color: var(--text-muted);
+}
+
+.download-icon.disabled, .trash-icon.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .file-name-container {
