@@ -8,6 +8,8 @@
 
 </div>
 
+![img.png](assets/img.png)
+
 ---
 
 ## Features
@@ -50,3 +52,12 @@ can be configured using environment variables.
             - /volume1/downloads/complete:/data
          restart: unless-stopped
       ```
+
+## Built With
+
+---
+
+- **Go** – backend and server
+- **htmx** – for dynamic HTML interactions
+- **PrimeFlex** – CSS utility classes ([link](https://github.com/primefaces/primeflex))
+- **PrimeIcons** – icon set ([link](https://github.com/primefaces/primeicons))
