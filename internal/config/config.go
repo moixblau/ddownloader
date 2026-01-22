@@ -14,6 +14,10 @@ type Config struct {
 	Logger           *slog.Logger
 }
 
+func (c *Config) IsTransmissionEnabled() bool {
+	return c.TransmissionHost != ""
+}
+
 func LoadConfig() *Config {
 	port := os.Getenv("PORT")
 	if port == "" {

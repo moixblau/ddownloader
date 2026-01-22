@@ -72,34 +72,41 @@ func (h *Handler) HandleFilesTable(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Add active downloads from Transmission
-	activeDownloads, err := h.transmissionService.GetActiveDownloads()
-	if err != nil {
-		h.cfg.Logger.Warn("Error getting active downloads from Transmission", "error", err)
-	} else {
-		var downloadNodes []models.FileNode
-		for _, name := range activeDownloads {
-			downloadNodes = append(downloadNodes, models.FileNode{
-				Name:          name,
-				FormatSize:    "downloading",
-				Icon:          "pi-cloud-download",
-				Color:         "#2196F3", // Blue color for downloads
-				IsFolder:      false,
-				IsDownloading: true,
-			})
-		}
-		// Prepend active downloads to the nodes list
-		nodes = append(downloadNodes, nodes...)
-	}
-
 	for i := range nodes {
 		if nodes[i].FormatSize == "" {
 			h.fileService.FillFormatSize(&nodes[i])
 		}
 	}
 
-	if err := h.templates.ExecuteTemplate(w, "table.html", nodes); err != nil {
+	if err := h.templates.ExecuteTemplate(w, "table.html", map[string]interface{}{
+		"Nodes":               nodes,
+		"TransmissionEnabled": h.cfg.IsTransmissionEnabled(),
+	}); err != nil {
 		h.cfg.Logger.Error("Error executing table template", "error", err)
+	}
+}
+
+func (h *Handler) HandleActiveDownloads(w http.ResponseWriter, r *http.Request) {
+	activeDownloads, err := h.transmissionService.GetActiveDownloads()
+	if err != nil {
+		h.cfg.Logger.Warn("Error getting active downloads from Transmission", "error", err)
+		return
+	}
+
+	var downloadNodes []models.FileNode
+	for _, name := range activeDownloads {
+		downloadNodes = append(downloadNodes, models.FileNode{
+			Name:          name,
+			FormatSize:    "downloading",
+			Icon:          "pi-cloud-download",
+			Color:         "#2196F3",
+			IsFolder:      false,
+			IsDownloading: true,
+		})
+	}
+
+	if err := h.templates.ExecuteTemplate(w, "rows.html", downloadNodes); err != nil {
+		h.cfg.Logger.Error("Error executing rows template for active downloads", "error", err)
 	}
 }
 

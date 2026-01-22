@@ -7,6 +7,9 @@
     </tr>
     </thead>
     <tbody id="file-tree-body">
-    {{template "rows.html" .}}
+    {{if .TransmissionEnabled}}
+    <tr hx-get="/active-downloads" hx-trigger="load" hx-swap="outerHTML"></tr>
+    {{end}}
+    {{template "rows.html" .Nodes}}
     </tbody>
 </table>

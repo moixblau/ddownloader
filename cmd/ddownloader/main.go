@@ -18,6 +18,7 @@ func main() {
 
 	http.HandleFunc("/", handlers.LoggingMiddleware(cfg.Logger, h.HandleIndex))
 	http.HandleFunc("/files", handlers.LoggingMiddleware(cfg.Logger, h.HandleFilesTable))
+	http.HandleFunc("/active-downloads", handlers.LoggingMiddleware(cfg.Logger, h.HandleActiveDownloads))
 	http.HandleFunc("/folder", handlers.LoggingMiddleware(cfg.Logger, h.HandleFolderContent))
 	http.HandleFunc("/download", handlers.LoggingMiddleware(cfg.Logger, h.HandleDownload))
 	http.HandleFunc("/delete", handlers.LoggingMiddleware(cfg.Logger, h.HandleDelete))
