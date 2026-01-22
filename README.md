@@ -34,25 +34,30 @@ can be configured using environment variables.
 ### Running with Docker
 
 1. Build the Docker compose :
-   ```yaml
-   services:
-      ddownloader:
-         image: moixblau/ddownloader:latest
-         container_name: ddownloader-app
-         ports:
-            - "3000:3000"
-         environment:
-            - TRANSMISSION_HOST: "localhost:9090"
-            - TRANSMISSION_USERNAME: "username"
-            - TRANSMISSION_PASSWORD: "password"
-         volumes:
-            - /volume1/downloads/complete:/data
-         restart: unless-stopped
-      ```
+```yaml
+services:
+  ddownloader:
+    image: moixblau/ddownloader:latest
+    container_name: ddownloader-app
+    ports:
+      - "3000:3000"
+    environment:
+      - TRANSMISSION_HOST=localhost:9090     # optional, only if using Transmission
+      - TRANSMISSION_USERNAME=username       # optional
+      - TRANSMISSION_PASSWORD=password       # optional
+      - THEME=light                          # optional, set to 'light' for light mode (default: dark)
+    volumes:
+      - /path/to/your/folder:/data           # <-- mount the directory you want to browse
+    restart: unless-stopped
+```
 
-### Optional Parameters
+2. Start the container
+```bash
+docker-compose up -d
+```
 
-- `THEME` – set to `light` to enable light mode (default: `dark`)
+3. Open your browser and navigate to http://localhost:3000 to access the UI.
+
 
 ## Built With
 
