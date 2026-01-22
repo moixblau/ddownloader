@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html lang="es" class="p-dark">
+<html lang="es" {{ if eq .Theme "dark" }}class="p-dark" style="color-scheme: dark"{{ else }}style="color-scheme: light"{{ end }}>
 <head>
     <title>DDownloader</title>
 
     <meta charset="UTF-8">
+    {{ if eq .Theme "light" }}
+    <link rel="stylesheet" href="https://unpkg.com/primeflex@latest/themes/lara-light.css">
+    {{ else }}
+    <link rel="stylesheet" href="https://unpkg.com/primeflex@latest/themes/lara-dark.css">
+    {{ end }}
     <link rel="stylesheet" href="https://unpkg.com/primeflex@latest/primeflex.css">
     <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css">
-    <link rel="stylesheet" href="https://unpkg.com/primereact/resources/themes/lara-dark-indigo/theme.css" id="theme-link">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
     <script src="/static/js/utils.js" defer></script>

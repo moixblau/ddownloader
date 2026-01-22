@@ -1,10 +1,18 @@
 :root {
+    --bg-color: #ffffff;
+    --card-bg: #ffffff;
+    --border-color: #dee2e6;
+    --text-main: #495057;
+    --text-muted: #6c757d;
+    --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
+}
+
+.p-dark:root {
     --bg-color: #121212;
     --card-bg: #18181b;
     --border-color: #1f1f1f;
     --text-main: rgba(255, 255, 255, 0.86);
     --text-muted: rgb(136, 136, 136);
-    --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Courier New', monospace;
 }
 
 body {
@@ -31,8 +39,8 @@ body {
 }
 
 .size-tag {
-    background: #162e3c;
-    color: #7dd3fc;
+    background: #e2e8f0;
+    color: #475569;
     padding: 0.25rem 0.75rem;
     border-radius: 6px;
     font-size: 0.8rem;
@@ -42,10 +50,20 @@ body {
     text-align: center;
 }
 
+.p-dark .size-tag {
+    background: #162e3c;
+    color: #7dd3fc;
+}
+
 .downloading-tag {
+    background: #dbeafe;
+    color: #1e40af;
+    min-width: 120px;
+}
+
+.p-dark .downloading-tag {
     background: #1e3a8a;
     color: #93c5fd;
-    min-width: 120px;
 }
 
 .downloading-text {
@@ -132,12 +150,12 @@ td {
 }
 
 .p-inputtext {
-    font-family: var(--font-family);
+    font-family: inherit;
     font-size: 1rem;
-    color: #ffffff;
-    background: #1f2937;
+    color: var(--text-main);
+    background: var(--bg-color);
     padding: 0.75rem 0.75rem;
-    border: 1px solid #374151;
+    border: 1px solid var(--border-color);
     transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
     border-radius: 6px;
     width: 250px;

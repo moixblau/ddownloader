@@ -45,7 +45,9 @@ func NewHandler(cfg *config.Config, fs *service.FileService) *Handler {
 }
 
 func (h *Handler) HandleIndex(w http.ResponseWriter, r *http.Request) {
-	if err := h.templates.ExecuteTemplate(w, "index.html", nil); err != nil {
+	if err := h.templates.ExecuteTemplate(w, "index.html", map[string]interface{}{
+		"Theme": h.cfg.Theme,
+	}); err != nil {
 		h.cfg.Logger.Error("Error executing index template", "error", err)
 	}
 }

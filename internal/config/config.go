@@ -11,6 +11,7 @@ type Config struct {
 	TransmissionHost string
 	TransmissionUser string
 	TransmissionPass string
+	Theme            string
 	Logger           *slog.Logger
 }
 
@@ -29,6 +30,11 @@ func LoadConfig() *Config {
 		dataDir = "/data"
 	}
 
+	theme := os.Getenv("THEME")
+	if theme == "" {
+		theme = "dark"
+	}
+
 	transmissionHost := os.Getenv("TRANSMISSION_HOST")
 	transmissionUser := os.Getenv("TRANSMISSION_USERNAME")
 	transmissionPass := os.Getenv("TRANSMISSION_PASSWORD")
@@ -41,6 +47,7 @@ func LoadConfig() *Config {
 		TransmissionHost: transmissionHost,
 		TransmissionUser: transmissionUser,
 		TransmissionPass: transmissionPass,
+		Theme:            theme,
 		Logger:           logger,
 	}
 }
