@@ -10,11 +10,9 @@
 
 ![img.png](assets/demo.png)
 
----
 
 ## Features
 
----
 
 ### Core
 - Recursive directory exploration
@@ -31,8 +29,6 @@
 DDownloader is designed to run inside a container and expose a specific
 directory. Transmission integration is optional and
 can be configured using environment variables.
-
----
 
 ### Running with Docker
 
@@ -58,8 +54,6 @@ can be configured using environment variables.
 - `THEME` – set to `light` to enable light mode (default: `dark`)
 
 ## Built With
-
----
 
 - **Go** – backend and server
 - **htmx** – for dynamic HTML interactions
