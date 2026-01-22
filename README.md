@@ -15,6 +15,7 @@
 
 
 ### Core
+- Ultra-lightweight - ~13 MB on disk, ~4 MB RAM
 - Recursive directory exploration
 - Visual file type identification (videos, images, PDFs, archives)
 - Responsive and clean UI
