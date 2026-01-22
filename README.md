@@ -2,8 +2,8 @@
   <h1>DDownloader</h1>
 
 <p>
-  A simple, fast, and lightweight web UI to browse and download files on specified directory,
-  with optional Transmission integration.
+  A simple, fast, and lightweight web UI to browse and download files from a specific directory, 
+  with optional Transmission integration to watch files being downloaded.
 </p>
 
 </div>
