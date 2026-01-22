@@ -8,7 +8,7 @@
 
 </div>
 
-![img.png](assets/img.png)
+![img.png](assets/demo.png)
 
 ---
 
@@ -52,6 +52,10 @@ can be configured using environment variables.
             - /volume1/downloads/complete:/data
          restart: unless-stopped
       ```
+
+### Optional Parameters
+
+- `THEME` – set to `light` to enable light mode (default: `dark`)
 
 ## Built With
 
