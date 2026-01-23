@@ -1,0 +1,51 @@
+{{range .}}
+<tr id="row-{{.Path}}" class="border-bottom-1 surface-border hover:surface-hover">
+    <td class="p-3" style="padding-left: {{multiply .Level 1.5}}rem !important;">
+        {{if .IsFolder}}
+        <div class="file-name-container" title="{{.Name}}">
+            <i class="pi pi-chevron-right cursor-pointer mr-2 expansion-icon"
+               hx-get="/folder?path={{.Path}}&level={{.Level}}"
+               hx-target="closest tr"
+               hx-swap="afterend"
+               hx-trigger="click[this.classList.contains('pi-chevron-down')]"
+               onclick="toggleIcon(this)"></i>
+            <i class="pi {{.Icon}} mr-2 folder-icon" style="color: {{.Color}}"></i>
+            <span class="truncate-text">{{.Name}}</span>
+        </div>
+        {{else}}
+        <div class="file-name-container" title="{{.Name}}">
+            <span style="display: inline-block; width: 1.5rem;"></span>
+            <i class="pi {{.Icon}} mr-2" style="color: {{.Color}}"></i>
+            <span class="truncate-text {{if .IsDownloading}}downloading-text{{end}}">{{.Name}}</span>
+        </div>
+        {{end}}
+    </td>
+    <td class="p-3 text-center">
+        <span class="size-tag {{if .IsDownloading}}downloading-tag{{end}}" data-size="{{.FormatSize}}">
+            {{.FormatSize}}
+        </span>
+    </td>
+    <td class="p-3 text-center">
+        {{if .IsDownloading}}
+        <span class="download-icon disabled" title="Downloading...">
+            <i class="pi pi-download"></i>
+        </span>
+        <span class="trash-icon disabled" title="Downloading...">
+            <i class="pi pi-trash"></i>
+        </span>
+        {{else}}
+        <a href="/download?path={{.Path}}" class="download-icon" title="Download">
+            <i class="pi pi-download"></i>
+        </a>
+        <button class="trash-icon p-link" 
+                title="Delete"
+                hx-post="/delete?path={{.Path}}"
+                hx-confirm="¿Are you sure you want to delete '{{.Name}}'?"
+                hx-target="closest tr"
+                hx-swap="delete">
+            <i class="pi pi-trash" style="color: #f44336"></i>
+        </button>
+        {{end}}
+    </td>
+</tr>
+{{end}}

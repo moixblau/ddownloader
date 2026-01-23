@@ -13,12 +13,14 @@ func GetFileMeta(path string, isDir bool) (string, string) {
 	switch ext {
 	case ".mp4", ".mkv", ".avi":
 		return "pi-video", "#ff5722"
+	case ".mp3", ".wav", ".flac", ".ogg":
+		return "pi-volume-up", "#2196f3"
 	case ".jpg", ".png", ".gif":
 		return "pi-image", "#4caf50"
 	case ".pdf":
 		return "pi-file-pdf", "#f44336"
 	case ".zip", ".rar":
-		return "pi-file-archive", "#9c27b0"
+		return "pi-book", "#9c27b0"
 	default:
 		return "pi-file", "var(--primary-color)"
 	}

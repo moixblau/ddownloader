@@ -1,57 +1,67 @@
-# ddownloader
+<div align="center">
+  <h1>DDownloader</h1>
 
-A simple, fast, and lightweight web-based file browser and downloader, specifically designed for NAS (Network Attached Storage) environments.
+<p>
+  A simple, fast, and lightweight web UI to browse and download files from a specific directory, 
+  with optional Transmission integration to watch files being downloaded.
+</p>
 
-## 🚀 Motivation
+</div>
 
-The primary motivation behind **ddownloader** was to create a friction-less way to download files from a NAS. Most existing solutions are either too bloated, slow, or complex for simple file retrieval. 
+![img.png](assets/demo.png)
 
-This project aims to be:
-- **Simple:** No complex configurations or heavy dependencies.
-- **Fast:** Efficient directory scanning and size calculation.
-- **Lightweight:** Minimal resource footprint, ideal for running on NAS hardware or low-power devices.
 
-## ✨ Features
+## Features
 
-- **Recursive Directory Exploration:** Browse through your files with ease.
-- **Real-time Size Calculation:** Automatically calculates the total size of directories.
-- **Visual File Type Identification:** Icons and colors for different file formats (Videos, Images, PDFs, Archives).
-- **Dockerized:** Ready to be deployed anywhere with a single command.
-- **Responsive UI:** Clean and simple interface for both desktop and mobile.
 
-## 🛠️ Installation & Usage
+### Core
+- Ultra-lightweight - ~13 MB on disk, ~4 MB RAM
+- Recursive directory exploration
+- Visual file type identification (videos, images, PDFs, archives)
+- Responsive and clean UI
+- Docker-ready
 
-### Running Locally
+### Optional
+- Transmission integration to list active downloads
 
-Ensure you have [Go](https://go.dev/) installed (v1.25 or higher recommended).
 
-1. Clone the repository.
-2. Build the application:
-   ```bash
-   go build -o ddownloader ./cmd/ddownloader/main.go
-   ```
-3. Run the binary:
-   ```bash
-   ./ddownloader
-   ```
-4. Open your browser at `http://localhost:3000`.
+## Usage
+
+DDownloader is designed to run inside a container and expose a specific
+directory. Transmission integration is optional and
+can be configured using environment variables.
 
 ### Running with Docker
 
-1. Build the image:
-   ```bash
-   docker build -t ddownloader .
-   ```
-2. Run the container:
-   ```bash
-   docker run -p 3000:3000 -v /path/to/your/files:/data ddownloader
-   ```
-   *(Note: Ensure your application is configured to point to the correct volume path)*.
-
-## 🧪 Testing
-
-The project includes unit tests for core logic and utilities. To run them:
-
-```bash
-go test ./...
+1. Build the Docker compose :
+```yaml
+services:
+  ddownloader:
+    image: moixblau/ddownloader:latest
+    container_name: ddownloader-app
+    ports:
+      - "3000:3000"
+    environment:
+      - TRANSMISSION_HOST=localhost:9090     # optional, only if using Transmission
+      - TRANSMISSION_USERNAME=username       # optional
+      - TRANSMISSION_PASSWORD=password       # optional
+      - THEME=light                          # optional, set to 'light' for light mode (default: dark)
+    volumes:
+      - /path/to/your/folder:/data           # <-- mount the directory you want to browse
+    restart: unless-stopped
 ```
+
+2. Start the container
+```bash
+docker-compose up -d
+```
+
+3. Open your browser and navigate to http://localhost:3000 to access the UI.
+
+
+## Built With
+
+- **Go** – backend and server
+- **htmx** – for dynamic HTML interactions
+- **PrimeFlex** – CSS utility classes ([link](https://github.com/primefaces/primeflex))
+- **PrimeIcons** – icon set ([link](https://github.com/primefaces/primeicons))

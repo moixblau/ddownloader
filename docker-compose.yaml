@@ -1,10 +1,11 @@
 services:
   ddownloader:
-    build: .
     image: moixblau/ddownloader:latest
     container_name: ddownloader-app
     ports:
       - "3323:3000"
+    environment:
+      TRANSMISSION_HOST: "localhost:9090"
     volumes:
       - /volume1/downloads/complete:/data:ro
     restart: unless-stopped
