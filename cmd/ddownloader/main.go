@@ -16,14 +16,16 @@ func main() {
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	http.HandleFunc("/", handlers.LoggingMiddleware(cfg.Logger, h.HandleIndex))
-	http.HandleFunc("/files", handlers.LoggingMiddleware(cfg.Logger, h.HandleFilesTable))
-	http.HandleFunc("/active-downloads", handlers.LoggingMiddleware(cfg.Logger, h.HandleActiveDownloads))
-	http.HandleFunc("/folder", handlers.LoggingMiddleware(cfg.Logger, h.HandleFolderContent))
-	http.HandleFunc("/download", handlers.LoggingMiddleware(cfg.Logger, h.HandleDownload))
-	http.HandleFunc("/delete", handlers.LoggingMiddleware(cfg.Logger, h.HandleDelete))
-
+	http.HandleFunc("/login", h.HandleLogin)
 	http.HandleFunc("/health", h.HandleHealth)
+
+	http.HandleFunc("/", handlers.AuthMiddleware(cfg, handlers.LoggingMiddleware(cfg.Logger, h.HandleIndex)))
+	http.HandleFunc("/files", handlers.AuthMiddleware(cfg, handlers.LoggingMiddleware(cfg.Logger, h.HandleFilesTable)))
+	http.HandleFunc("/active-downloads", handlers.AuthMiddleware(cfg, handlers.LoggingMiddleware(cfg.Logger, h.HandleActiveDownloads)))
+	http.HandleFunc("/folder", handlers.AuthMiddleware(cfg, handlers.LoggingMiddleware(cfg.Logger, h.HandleFolderContent)))
+	http.HandleFunc("/download", handlers.AuthMiddleware(cfg, handlers.LoggingMiddleware(cfg.Logger, h.HandleDownload)))
+	http.HandleFunc("/delete", handlers.AuthMiddleware(cfg, handlers.LoggingMiddleware(cfg.Logger, h.HandleDelete)))
+	http.HandleFunc("/logout", handlers.AuthMiddleware(cfg, h.HandleLogout))
 
 	fmt.Printf("Starting server on http://localhost:%s\n", cfg.Port)
 	cfg.Logger.Info("Server started", "port", cfg.Port, "dataDir", cfg.DataDir)

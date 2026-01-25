@@ -32,6 +32,7 @@ func NewHandler(cfg *config.Config, fs *service.FileService) *Handler {
 		"templates/index.html",
 		"templates/table.html",
 		"templates/rows.html",
+		"templates/login.html",
 	))
 
 	ts := service.NewTransmissionService(cfg.TransmissionHost, cfg.TransmissionUser, cfg.TransmissionPass)
@@ -46,7 +47,8 @@ func NewHandler(cfg *config.Config, fs *service.FileService) *Handler {
 
 func (h *Handler) HandleIndex(w http.ResponseWriter, r *http.Request) {
 	if err := h.templates.ExecuteTemplate(w, "index.html", map[string]interface{}{
-		"Theme": h.cfg.Theme,
+		"Theme":       h.cfg.Theme,
+		"AuthEnabled": h.cfg.IsAuthEnabled(),
 	}); err != nil {
 		h.cfg.Logger.Error("Error executing index template", "error", err)
 	}

@@ -32,6 +32,11 @@
                            hx-trigger="keyup changed delay:500ms" 
                            hx-target="#files-container">
                 </div>
+                {{ if .AuthEnabled }}
+                <a href="/logout" class="p-button p-button-sm p-button-text p-button-danger">
+                    <i class="pi pi-sign-out mr-2"></i>Logout
+                </a>
+                {{ end }}
             </div>
         </div>
 

@@ -12,11 +12,16 @@ type Config struct {
 	TransmissionUser string
 	TransmissionPass string
 	Theme            string
+	AuthPassword     string
 	Logger           *slog.Logger
 }
 
 func (c *Config) IsTransmissionEnabled() bool {
 	return c.TransmissionHost != ""
+}
+
+func (c *Config) IsAuthEnabled() bool {
+	return c.AuthPassword != ""
 }
 
 func LoadConfig() *Config {
@@ -39,6 +44,8 @@ func LoadConfig() *Config {
 	transmissionUser := os.Getenv("TRANSMISSION_USERNAME")
 	transmissionPass := os.Getenv("TRANSMISSION_PASSWORD")
 
+	authPassword := os.Getenv("AUTH_PASSWORD")
+
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	return &Config{
@@ -48,6 +55,7 @@ func LoadConfig() *Config {
 		TransmissionUser: transmissionUser,
 		TransmissionPass: transmissionPass,
 		Theme:            theme,
+		AuthPassword:     authPassword,
 		Logger:           logger,
 	}
 }
