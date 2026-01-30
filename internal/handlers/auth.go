@@ -50,7 +50,7 @@ func (h *Handler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 		if err := h.templates.ExecuteTemplate(w, "login.html", map[string]interface{}{
 			"Theme": h.cfg.Theme,
-			"Error": "Contraseña incorrecta",
+			"Error": "Wrong password!",
 		}); err != nil {
 			h.cfg.Logger.Error("Error executing login template", "error", err)
 		}
